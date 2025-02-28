@@ -36,7 +36,7 @@ function sliderTable(table){
             let speed = Math.pow(2, v);
 
             // Instead of slowing system time, increase wave delay
-            Vars.state.waveSpacing = Math.max(60, 60 * speed) + waveExtraTime * Math.abs(v);
+            Vars.state.wavetime = Vars.state.wavetime + waveExtraTime;
 
             Tmp.c1.lerp(cols, (timeSlider.getValue() + 8) / 16);
             
@@ -56,7 +56,8 @@ function foldedButtonTable(table){
             let speed = Math.pow(2, curSpeed);
 
             // Increase only the wave timer
-            Vars.state.waveSpacing = Math.max(60, 60 * speed) + waveExtraTime * Math.abs(curSpeed);
+            Vars.state.wavetime = Vars.state.wavetime + waveExtraTime;
+
 
             foldedButton.setText(speedText(curSpeed));
             timeSlider.setValue(curSpeed);
