@@ -1,4 +1,4 @@
-let cols = [Pal.lancerLaser, Pal.accent, Color.valueOf("cc6eaf")]; // Pink from BetaMindy
+let cols = [Pal.lancerLaser, Pal.accent, Color.valueOf("cc6eaf")]; //Pink from BetaMindy
 let folded = false;
 let curSpeed = 0;
 let longPress = 30;
@@ -6,10 +6,9 @@ let unfoldTimer = 0;
 
 let timeSlider = null;
 let foldedButton = null;
-let waveTimeButton = null;
 
-// Extra time added per click (in game ticks)
-const waveExtraTime = 60 * 60; // 60 seconds
+// Extra time added per slowdown step
+const waveExtraTime = 60 * 60; // 60 seconds in game ticks
 
 function sliderTable(table){
     table.table(Tex.buttonEdge3, t => {
@@ -35,8 +34,10 @@ function sliderTable(table){
         timeSlider.moved(v => {
             curSpeed = v;
             let speed = Math.pow(2, v);
-            Time.setDeltaProvider(() => Math.min(Core.graphics.getDeltaTime() * 60 * speed, 3 * speed));
-            
+
+            // Instead of slowing system time, increase wave delay
+            Vars.state.waveSpacing = Math.max(60, 60 * speed) + waveExtraTime * Math.abs(v);
+
             Tmp.c1.lerp(cols, (timeSlider.getValue() + 8) / 16);
             
             l.setText(speedText(v));
@@ -53,8 +54,10 @@ function foldedButtonTable(table){
             if(curSpeed > 2) curSpeed = -2;
             
             let speed = Math.pow(2, curSpeed);
-            Time.setDeltaProvider(() => Math.min(Core.graphics.getDeltaTime() * 60 * speed, 3 * speed));
-            
+
+            // Increase only the wave timer
+            Vars.state.waveSpacing = Math.max(60, 60 * speed) + waveExtraTime * Math.abs(curSpeed);
+
             foldedButton.setText(speedText(curSpeed));
             timeSlider.setValue(curSpeed);
         }).grow().width(10.5 * 8).get();
@@ -73,16 +76,6 @@ function foldedButtonTable(table){
         });
     }).height(72);
     table.visibility = () => folded && visibility();
-}
-
-// New function to add extra wave time
-function extraWaveTimeButton(table){
-    table.table(Tex.buttonEdge3, t => {
-        waveTimeButton = t.button("➕", () => {
-            Vars.state.waveSpacing += waveExtraTime; // Add extra 60s per click
-            Call.infoToast("Wave delay increased!\nNew delay: " + (Vars.state.waveSpacing / 60) + " seconds", 3);
-        }).grow().width(12 * 8).get();
-    }).height(72);
 }
 
 function speedText(speed){
@@ -115,16 +108,10 @@ if(!Vars.headless){
         st.bottom().left();
         sliderTable(st);
         Vars.ui.hudGroup.addChild(st);
-
-        let et = new Table();
-        et.bottom().left().padLeft(140); // Position next to time button
-        extraWaveTimeButton(et);
-        Vars.ui.hudGroup.addChild(et);
         
         if(Vars.mobile){
             st.moveBy(0, Scl.scl(46));
             ft.moveBy(0, Scl.scl(46));
-            et.moveBy(0, Scl.scl(46));
         }
     });
 }
