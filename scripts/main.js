@@ -71,10 +71,10 @@ function foldedButtonTable(table){
             }
         });
 
-        extraWaveTimeButton = t.button("[accent]➕", () => {
+        extraWaveTimeButton = t.button("[accent]+", () => {
             Vars.state.wavetime += waveExtraTime
         }).grow().width(5.5 * 8).get();
-        extraWaveTimeButton.margin(0);
+        extraWaveTimeButton.margin(2);
     }).height(72);
     table.visibility = () => folded && visibility();
 }
