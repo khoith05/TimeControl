@@ -73,8 +73,8 @@ function foldedButtonTable(table){
 
         extraWaveTimeButton = t.button("[accent]+", () => {
             Vars.state.wavetime += waveExtraTime
-        }).grow().width(5.5 * 8).get();
-        extraWaveTimeButton.margin(2);
+        }).grow().width(5.5 * 8).padLeft(6).get();
+        extraWaveTimeButton.margin(0);
     }).height(72);
     table.visibility = () => folded && visibility();
 }
