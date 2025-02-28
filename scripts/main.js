@@ -6,6 +6,7 @@ let unfoldTimer = 0;
 
 let timeSlider = null;
 let foldedButton = null;
+let extraWaveTimeButton = null;
 
 // Extra time added per slowdown step
 const waveExtraTime = 60 * 60; // 60 seconds in game ticks
@@ -30,14 +31,11 @@ function sliderTable(table){
         let b = t.button(new TextureRegionDrawable(Icon.refresh), 24, () => timeSlider.setValue(0)).padLeft(6).get();
         b.getStyle().imageUpColor = Pal.accent;
         t.add(timeSlider).padLeft(6).minWidth(200);
-        
         timeSlider.moved(v => {
             curSpeed = v;
             let speed = Math.pow(2, v);
-
-            // Instead of slowing system time, increase wave delay
-            Vars.state.wavetime = Vars.state.wavetime + waveExtraTime;
-
+            Time.setDeltaProvider(() => Math.min(Core.graphics.getDeltaTime() * 60 * speed, 3 * speed));
+            
             Tmp.c1.lerp(cols, (timeSlider.getValue() + 8) / 16);
             
             l.setText(speedText(v));
@@ -54,11 +52,8 @@ function foldedButtonTable(table){
             if(curSpeed > 2) curSpeed = -2;
             
             let speed = Math.pow(2, curSpeed);
-
-            // Increase only the wave timer
-            Vars.state.wavetime = Vars.state.wavetime + waveExtraTime;
-
-
+            Time.setDeltaProvider(() => Math.min(Core.graphics.getDeltaTime() * 60 * speed, 3 * speed));
+            
             foldedButton.setText(speedText(curSpeed));
             timeSlider.setValue(curSpeed);
         }).grow().width(10.5 * 8).get();
@@ -75,6 +70,11 @@ function foldedButtonTable(table){
                 unfoldTimer = 0;
             }
         });
+
+        extraWaveTimeButton = t.button("[accent]➕", () => {
+            Vars.state.wavetime += waveExtraTime
+        }).grow().width(5.5 * 8).get();
+        secondButton.margin(0);
     }).height(72);
     table.visibility = () => folded && visibility();
 }
