@@ -1,4 +1,4 @@
-let cols = [Pal.lancerLaser, Pal.accent, Color.valueOf("cc6eaf")]; //Pink from BetaMindy
+let cols = [Pal.lancerLaser, Pal.accent, Color.valueOf("cc6eaf")]; // Pink from BetaMindy
 let folded = false;
 let curSpeed = 0;
 let longPress = 30;
@@ -6,6 +6,10 @@ let unfoldTimer = 0;
 
 let timeSlider = null;
 let foldedButton = null;
+let waveTimeButton = null;
+
+// Extra time added per click (in game ticks)
+const waveExtraTime = 60 * 60; // 60 seconds
 
 function sliderTable(table){
     table.table(Tex.buttonEdge3, t => {
@@ -27,6 +31,7 @@ function sliderTable(table){
         let b = t.button(new TextureRegionDrawable(Icon.refresh), 24, () => timeSlider.setValue(0)).padLeft(6).get();
         b.getStyle().imageUpColor = Pal.accent;
         t.add(timeSlider).padLeft(6).minWidth(200);
+        
         timeSlider.moved(v => {
             curSpeed = v;
             let speed = Math.pow(2, v);
@@ -70,6 +75,16 @@ function foldedButtonTable(table){
     table.visibility = () => folded && visibility();
 }
 
+// New function to add extra wave time
+function extraWaveTimeButton(table){
+    table.table(Tex.buttonEdge3, t => {
+        waveTimeButton = t.button("➕", () => {
+            Vars.state.waveSpacing += waveExtraTime; // Add extra 60s per click
+            Call.infoToast("Wave delay increased!\nNew delay: " + (Vars.state.waveSpacing / 60) + " seconds", 3);
+        }).grow().width(12 * 8).get();
+    }).height(72);
+}
+
 function speedText(speed){
     Tmp.c1.lerp(cols, (speed + 8) / 16);
     let text = "[#" + Tmp.c1.toString() + "]";
@@ -100,10 +115,16 @@ if(!Vars.headless){
         st.bottom().left();
         sliderTable(st);
         Vars.ui.hudGroup.addChild(st);
+
+        let et = new Table();
+        et.bottom().left().padLeft(140); // Position next to time button
+        extraWaveTimeButton(et);
+        Vars.ui.hudGroup.addChild(et);
         
         if(Vars.mobile){
             st.moveBy(0, Scl.scl(46));
             ft.moveBy(0, Scl.scl(46));
+            et.moveBy(0, Scl.scl(46));
         }
     });
 }
